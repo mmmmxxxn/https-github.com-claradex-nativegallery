@@ -1,44 +1,17 @@
-<?php
+<!DOCTYPE html>
+<html lang="ru">
 
-use \App\Services\{Auth, DB};
-use \App\Models\User;
-
-$user = new \App\Models\User(Auth::userid());
-
-if (NGALLERY['root']['logo'] != null) {
-    $logo = NGALLERY['root']['logo'];
-    $width = '70px';
-} else {
-    $logo = '/static/img/logosmall.png';
-    $width = '70px';
-}
-
-if (NGALLERY['root']['title'] != null && NGALLERY['root']['showtitle'] === true) {
-    $title = NGALLERY['root']['title'];
-} else if (NGALLERY['root']['showtitle'] === false) {
-    $title = '';
-} else {
-    $title = 'NativeGallery';
-}
-
-$noncheckedimgs = DB::query('SELECT COUNT(*) FROM followers_notifications WHERE checked=0 AND follower_id=:id', array(':id'=>Auth::userid()))[0]['COUNT(*)'];
-if ($noncheckedimgs > 0) {
-    $nonrw = '<span class="mm-notify notify-count">'.$noncheckedimgs.'</span>';
-}
-    
-?>
-<tr>
-<?php
-if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status') === 3) { ?>
-<div class="label-orange" style="padding:10px; margin:0 -20px; color:#fff">
-<center><h4 style="color:#fff; margin-bottom:3px">Пожалуйста, подтвердите свою почту</h4>
-<div>Так мы сможем убедиться, что Вы настоящий человек. После подтверждения, Вам будет доступен полностью функционал сайта.<br><br><b>Письмо с ссылкой для подтверждения почты была отправлена на Ваш ящик, указанный при регистрации.</b></div></center></div>
-<?php } ?>
+<head>
+{include "@head.latte"}
+</head>
+<body>
+    <div id="backgr"></div>
+    <table class="tmain">
+    <tr>
     <td class="mm-bar">
-        <?php
-        if (explode('/', $_SERVER['REQUEST_URI'])[1] === 'photo') { ?>
-    <a id="title-small" href="/"><img src="<?=$logo?>"><?=$title?></a>
-    <?php } ?>
+    {if explode('/', $_SERVER['REQUEST_URI'])[1] === 'photo'}
+    <a id="title-small" href="/"><img src="{$ngallery['root']['logo']}">{$ngallery['root']['title']}</a>
+    {/if}
         <ul class="mm mm-level-1">
             <li><a href="#" onclick="return false" class="mm-item"><span class="mm-label">Дополнительно</span></a>
                 <div>
@@ -82,53 +55,56 @@ if (NGALLERY['root']['registration']['emailverify'] === true && $user->i('status
                     </ul>
                 </div>
             </li>
-            <?php
-            if (Auth::userid() <= 0) { ?>
+            {if App\Services\Auth::userid() <= 0}
             
                 <li class="mm-pad-right"><a href="/login" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-address-card"></i></span><span class="mm-label">Войти</span></a></li>
                 <li><a href="/register" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-user"></i></span><span class="mm-label">Регистрация</span></a></li>
-            <?php } else { ?>
-                <?php
-                            if ($user->i('admin') > 0) { 
-                                $nonreviewedimgs = DB::query('SELECT COUNT(*) FROM photos WHERE moderated=0')[0]['COUNT(*)'];
-                                if ($nonreviewedimgs > 0) {
-                                    $nonr = '<span class="mm-notify notify-count">'.$nonreviewedimgs.'</span>';
-                                }
-                            }
-                                ?>
-                <li class="mm-pad-right mm-wide"><a href="/author/<?=Auth::userid()?>/" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-user"></i></span><span class="mm-label"><?=$user->i('username')?></span><?=$nonr?></a>
+            {else}
+                <li class="mm-pad-right mm-wide">
+                <a href="/author/{$user_id}/" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-user"></i></span><span class="mm-label">{$user->i('username')}</span>{if $nonreviewedimgs > 0 && $user->i('admin') > 0}<span class="mm-notify notify-count">{$nonreviewedimgs}</span>{/if}</a>
                     <div>
                         <ul class="mm-level-2">
                             <li><a href="/lk/" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-info-circle"></i></span><span class="mm-label">Общая информация</span></a></li>
-                            <?php
-                            if ($user->i('admin') > 0) { 
-                              
-                                ?>
-                        
+                            {if $user->i('admin') > 0}
                                 <li><a href="/admin" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-info-circle"></i></span><span class="mm-label">Admin</span><?=$nonr?></a></li>
-                            <?php }
-                            if (NGALLERY['root']['registration']['emailverify'] != true || $user->i('status') != 3) { ?>
+                            {/if}
+                            {if $ngallery['root']['registration']['emailverify'] != true || $user->i('status') != 3}
                             <li><a href="/lk/upload" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-plus-square"></i></span><span class="mm-label"><b>Предложить медиа</b></span></a></li>
-                            <?php } ?>
+                            {/if}
                             <li><a href="/lk/history" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-images"></i></span><span class="mm-label">Журнал</span></a></li>
                             <li><a href="/lk/konkurs.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-compass"></i></span><span class="mm-label">Конкурс</span></a></li>
                             <li><a href="/vehicle/edit" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-folder-plus"></i></span><span class="mm-label"><b>Правка БД</b></span></a></li>
                             <li><a href="/lk/ticket.php" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-question-circle"></i></span><span class="mm-label">Мои заявки</span></a></li>
                             <li><a href="/lk/profile" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-cog"></i></span><span class="mm-label">Настройки профиля</span></a></li>
-                            <li><a href="/search?id=<?=Auth::userid()?>" class="mm-item"><span class="mm-icon"><i class="far fa-sm fa-fw fa-images"></i></span><span class="mm-label">Мои фотографии</span></a></li>
+                            <li><a href="/search?id={$user_id}" class="mm-item"><span class="mm-icon"><i class="far fa-sm fa-fw fa-images"></i></span><span class="mm-label">Мои фотографии</span></a></li>
                             <li><a href="/fav" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-star"></i></span><span class="mm-label">Избранные снимки</span></a></li>
                             <li><a href="/logout" class="mm-item"><span class="mm-icon"><i class="fas fa-sm fa-fw fa-sign-out-alt"></i></span><span class="mm-label">Выход</span></a></li>
                         </ul>
                     </div>
                 </li>
-            <?php } ?>
-
+                <li class="mm-wide">
+                <a href="/messages" class="mm-item"><span class="mm-icon"><i class="fas fa-xs fa-message"></i></span></a>
+                </li>
+           {/if}
         </ul>
     </td>
 </tr>
-<?php
-        if (explode('/', $_SERVER['REQUEST_URI'])[1] != 'photo') { ?>
+{if explode('/', $_SERVER['REQUEST_URI'])[1] != 'photo'}
 <tr>
-    <td><a href="/" id="title"><img style="width: <?=$width?>;" src="<?=$logo?>" alt="<?=$title?>"><span><?=$title?></span></a></td>
+    <td><a href="/" id="title"><img style="width: <?=$width?>;" src="{$ngallery['root']['logo']}" alt="{$ngallery['root']['title']}"><span>{$ngallery['root']['title']}</span></a></td>
 </tr>
-<?php } ?>
+{/if}
+<td class="main">
+{block content}{/block}
+</td>
+ <tr>
+
+    {include "@footer.latte"}
+
+
+        </tr>
+    </table>
+
+</body>
+
+</html>

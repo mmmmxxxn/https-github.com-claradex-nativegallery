@@ -1,92 +1,28 @@
-<?php
-
-use App\Services\{DB, Auth, Date, Json};
-use App\Models\{User, Vote, Comment};
-?>
-<!DOCTYPE html>
-<html lang="ru">
-
-<head>
-    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
-
-
-</head>
-
-
-<style>
-    .ix-country {
-        padding-top: 3px;
-        white-space: nowrap;
-        font-family: var(--narrow-font);
-        font-size: 18px;
-    }
-
-    .ix-country>a>b {
-        border-bottom: dotted 1px;
-    }
-
-    .ix-cities {
-        padding: 5px 0 15px 15px;
-    }
-
-    .ix-arrow {
-        display: inline-block;
-        width: 9px;
-        height: 9px;
-        background: url("/img/arrow_blue.png") no-repeat;
-        transition: transform .1s ease-out;
-        position: relative;
-        top: -1px;
-    }
-
-    .ix-arrow.ix-arrow-expanded {
-        transform: rotate(90deg);
-    }
-</style>
-
-
-
-
-</head>
-
-
-<body>
-    <div id="backgr"></div>
-    <table class="tmain">
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
-        <tr>
-            <td class="main">
-                <table id="idx-main">
+{layout '..\@layout.latte'}
+{block content}
+  <table id="idx-main">
                     <tr>
 
                         <td style="vertical-align:top; padding-right:20px">
 
                             <h4><a href="/top30">Самые популярные за 24 часа</a></h4>
                             <div>
-                                <?php
-                                $photos = DB::query('SELECT photo_id, COUNT(*) as view_count
-FROM photos_views
-WHERE time >= UNIX_TIMESTAMP(NOW()) - 86400
-GROUP BY photo_id
-ORDER BY view_count DESC
-LIMIT 10;');
-                                foreach ($photos as $pd) {
-                                    $photo = DB::query('SELECT * FROM photos WHERE id=:id', array(':id' => $pd['photo_id']));
-                                    foreach ($photo as $p) {
-                                        $author = new User($p['user_id']);
-                                        echo '<a href="/photo/' . $p['id'] . '" target="_blank" class="prw pop-prw">
-   <img width="250" src="/api/photo/compress?url=' . $p['photourl'] . '">
-   <div class="hpshade">
-      <div class="eye-icon">+' . $pd['view_count'] . '</div>
-   </div>';
-                                        if ((int)$p['priority'] === 1) {
-                                            echo '<div class="temp" style="background-image:url(/static/img/cond.png)"></div>';
-                                        }
-                                        echo '
-</a>';
-                                    }
-                                }
-                                ?>
+                               {var $photos = \App\Services\DB::query('SELECT photo_id, COUNT(*) as view_count FROM photos_views WHERE time >= UNIX_TIMESTAMP(NOW()) - 86400 GROUP BY photo_id ORDER BY view_count DESC LIMIT 10;')}
+                                {foreach $photos as $pd}
+                                    {var $photo = \App\Services\DB::query('SELECT * FROM photos WHERE id=:id', array(':id' => $pd['photo_id']))}
+                                    {foreach $photo as $p}
+                                        {var $author = new \App\Models\User($p['user_id'])}
+                                        <a href="/photo/{$p['id']}" target="_blank" class="prw pop-prw">
+                                        <img width="250" src="/api/photo/compress?url={$p['photourl']}">
+                                        <div class="hpshade">
+                                            <div class="eye-icon">+{$pd['view_count']}</div>
+                                        </div>
+                                        {if $p['priority'] === 1}
+                                            <div class="temp" style="background-image:url(/static/img/cond.png)"></div>
+                                        {/if}
+                                        </a>
+                                    {/foreach}
+                                {/foreach}
                             </div>
 
 
@@ -102,25 +38,21 @@ LIMIT 10;');
 
                             <h4><a href="/photo/" target="_blank">Случайные фотографии</a></h4>
                             <div id="random-photos" class="ix-photos ix-photos-oneline">
-                                <?php
-                                $photos = DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY RAND() DESC LIMIT 7');
-                                foreach ($photos as $p) {
-                                    if ($p['posted_at'] === 943909200 || Date::zmdate($p['posted_at']) === '30 ноября 1999 в 00:00') {
-                                        $date = 'дата не указана';
-                                    } else {
-                                        $date = Date::zmdate($p['posted_at']);
-                                    }
-                                    $bck = 'background-image:url("/api/photo/compress?url=' . $p['photourl'] . '")';
-                                    echo ' <div class="prw-grid-item">
-                                    <div class="prw-wrapper"><span style="word-spacing:-1px"><b>' . htmlspecialchars($p['place']) . '</b></span>
-                                        <div>' . $date . '</div>
+                                {var $photos = \App\Services\DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY RAND() DESC LIMIT 7')}
+                                {foreach $photos as $p}
+                                    {var $photourl = $p['photourl']}
+                                    {if $p['posted_at'] === 943909200 || \App\Services\Date::zmdate($p['posted_at']) === '30 ноября 1999 в 00:00'}
+                                        {var $date = 'дата не указана'}
+                                    {else}
+                                        {var $date = Date::zmdate($p['posted_at'])}
+                                    {/if}
+                                    <div class="prw-grid-item">
+                                    <div class="prw-wrapper"><span style="word-spacing:-1px"><b>{$p['place']}</b></span>
+                                        <div>{$date}</div>
                                     </div>
-                                    '; ?>
-                                    <a href="/photo/<?= $p['id'] ?>" target="_blank" class="prw-animate" style='background-image:url("/api/photo/compress?url=<?= $p['photourl'] ?>")'></a>
-                                <?php echo '
-                                </div>';
-                                }
-                                ?>
+                                    <a href="/photo/{$p['id']}" target="_blank" class="prw-animate" style='background-image:url("/api/photo/compress?url={$photourl}")'></a>
+                                </div>
+                                {/foreach}
                             </div>
                             <style>
                                 #contestNotify {
@@ -128,24 +60,23 @@ LIMIT 10;');
                                     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 550 211.2" width="550" height="211.2" style="opacity: 0.3; filter: grayscale(0);"><text x="0em" y="1em" font-size="88" transform="rotate(17 55 52.8)">🎁</text><text x="1.25em" y="2em" font-size="88" transform="rotate(17 165 140.8)">🎈</text><text x="2.5em" y="1em" font-size="88" transform="rotate(17 275 52.8)">🎀</text><text x="3.75em" y="2em" font-size="88" transform="rotate(17 385 140.8)">🎊</text><text x="5em" y="1em" font-size="88" transform="rotate(17 495 52.8)">🎉</text></svg>');
                                 }
                             </style>
-                            
-                            <?php
-                            if (DB::query('SELECT status FROM contests WHERE status=2')[0]['status'] === 2) {
-                                $contest = DB::query('SELECT * FROM contests WHERE status=2')[0];
-                                $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
-                                echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
+
+                            {if \App\Services\DB::query('SELECT status FROM contests WHERE status=2')[0]['status'] === 2}
+                                {var $contest = \App\Services\DB::query('SELECT * FROM contests WHERE status=2')[0]}
+                                {var $theme = \App\Services\DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0]}
+                                <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Закончится через:</span> <b id="countdown"></b><br>
-                                Тематика: <b>' . $theme['title'] . '</b><br>
+                                Тематика: <b>{$theme['title']}</b><br>
                                 <b style="color: #412378;">Голосуйте за лучшие фотографии, которые должны стать победителями сегодняшнего конкурса!</b><br><br>
                                 <div id="contestBtns"><a href="/voting" style="background-color: #37009D; color: #fff;" type="button">Голосовать!</a></div>
-                                <script>startCountdown(' . $contest['closedate'] . ');</script>';
-                            } else if (DB::query('SELECT status FROM contests WHERE status=1')[0]['status'] === 1) {
-                                $contest = DB::query('SELECT * FROM contests WHERE status=1')[0];
-                                $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0];
+                                <script>startCountdown(' . $contest['closedate'] . ');</script>
+                            {elseif \App\Services\DB::query('SELECT status FROM contests WHERE status=1')[0]['status'] === 1}
+                                {var $contest = DB::query('SELECT * FROM contests WHERE status=1')[0]}
+                                {var $theme = DB::query('SELECT * FROM contests_themes WHERE id=:id', array(':id' => $contest['themeid']))[0]}
                                 echo ' <div id="contestNotify" style="float:left; border:solid 1px #171022; padding:6px 10px 7px; margin-bottom:13px; background-color:#E5D6FF"><h4>Фотоконкурс!</h4>
                                 <span id="timett">Начнётся через:</span> <b id="countdown"></b><br>
-                                Тематика: <b>' . $theme['title'] . '</b><br>
-                                <b id="textContest" style="color: #412378;">Лучшие фотографии по мнению сообщества ' . NGALLERY['root']['title'] . ' будут отмечены</b><br><br>
+                                Тематика: <b>{$theme['title']}</b><br>
+                                <b id="textContest" style="color: #412378;">Лучшие фотографии по мнению сообщества {$ngallery['root']['title']} будут отмечены</b><br><br>
                                 <div id="contestBtns"><a href="/voting/sendpretend" style="background-color: #37009D; color: #fff;" type="button">Участвовать!</a> <a href="/voting/waiting" style="background-color: #37009D; color: #fff;" type="button">Голосовать за претендентов</a></div>
                                 <script>
                                  $(document).ready(function () {
@@ -189,11 +120,9 @@ LIMIT 10;');
                                 });
 
 
-                                </script>';
-                            }
+                                </script>
+                            {/if}
 
-
-                            ?>
 
 
 
@@ -208,13 +137,8 @@ LIMIT 10;');
 
 
                             <h4 style="clear:both"><a href="/update">Недавно добавленные фотографии</a></h4>
-                            <?php
-                            $photos = DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY id DESC LIMIT 30');
-
-                            $first_id = $photos[0]['id'];
-                            $last_id = end($photos)['id'];
-                            ?>
-                            <div id="recent-photos" class="ix-photos ix-photos-multiline" lastpid="<?= $first_id + 1 ?>" firstpid="<?= $last_id ?>">
+                            {var $photos = \App\Services\DB::query('SELECT * FROM photos WHERE moderated=1 ORDER BY id DESC LIMIT 30')}
+                            <div id="recent-photos" class="ix-photos ix-photos-multiline" lastpid="{$photos[0]['id']+1}" firstpid="{end($photos)['id']}">
 
                             </div>
                             </div>
@@ -224,14 +148,12 @@ LIMIT 10;');
 
 
 
-                            <h4>Сейчас на сайте (<?= DB::query('SELECT COUNT(*) FROM users WHERE online>=:time-300 ORDER BY online DESC', array(':time' => time()))[0]['COUNT(*)'] ?>)</h4>
+                            <h4>Сейчас на сайте ({\App\Services\DB::query('SELECT COUNT(*) FROM users WHERE online>=:time-300 ORDER BY online DESC', array(':time' => time()))[0]['COUNT(*)']})</h4>
                             <div>
-                                <?php
-                                $online = DB::query('SELECT * FROM users WHERE online>=:time-300 ORDER BY online DESC', array(':time' => time()));
-                                foreach ($online as $o) {
-                                    echo '<a href="/author/' . $o['id'] . '/">' . htmlspecialchars($o['username']) . '</a>, ';
-                                }
-                                ?>
+                                {var $online = \App\Services\DB::query('SELECT * FROM users WHERE online>=:time-300 ORDER BY online DESC', array(':time' => time()))}
+                                {foreach $online as $o}
+                                    <a href="/author/{$o['id']}/">{$o['username']}</a>{if end($online)['id'] === $o['id']}.{else},{/if}
+                                {/foreach}
 
                             </div>
                         </td>
@@ -239,26 +161,13 @@ LIMIT 10;');
 
                             <h4>Новости сайта</h4>
                             <div class="sm" style="margin-bottom:15px; line-height:13px; white-space:normal">
-                                <?php
-                                $news = DB::query('SELECT * FROM news ORDER BY id DESC LIMIT 10');
-                                foreach ($news as $n) {
-                                    echo '<div class="ix-news-item"><b>' . Date::zmdate($n['time']) . '</b>
-                                    <div class="break-links" style="padding-top:3px">' . $n['body'] . '</div>
-                                </div>';
-                                }
-                                ?>
+                                {foreach \App\Services\DB::query('SELECT * FROM news ORDER BY id DESC LIMIT 10') as $n}
+                                    <div class="ix-news-item"><b>{\App\Services\Date::zmdate($n['time'])}</b>
+                                    <div class="break-links" style="padding-top:3px">{$n['body']}</div>
+                                </div>
+                                {/foreach}
                             </div>
                         </td>
                     </tr>
                 </table>
-            </td>
-        </tr>
-        <tr>
-            <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
-        </tr>
-    </table>
-
-
-</body>
-
-</html>
+{/block}

@@ -1,25 +1,6 @@
-<?php
-
-use App\Services\{Router, Auth};
-
-if (Auth::userid() > 0) {
-    Router::redirect('/');
-}
-?>
-<html lang="ru">
-
-
-<head>
-    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
-
-
-</head>
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-
-<body>
-    <div id="backgr"></div>
-    <table class="tmain">
-        <style>
+{layout '..\@layout.latte'}
+{block content}
+<style>
             .styled-input {
                 position: relative;
                 margin: 20px 0;
@@ -56,11 +37,7 @@ if (Auth::userid() > 0) {
                 color: #000;
             }
         </style>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
-        <tr>
-            <td class="main">
-                <?php
-                if (NGALLERY['root']['registration']['access']['public'] === true) {  ?>
+{if $ngallery['root']['registration']['access']['public'] === true}
                     <center>
                         <h1><b>Регистрация</b></h1>
                         <table cellspacing="10" cellpadding="0" border="0" align="center" style="margin: 9px;">
@@ -70,7 +47,7 @@ if (Auth::userid() > 0) {
                                         <img src="/static/img/logocube.png" style="width: 32px;" align="middle">
                                     </td>
                                     <td>
-                                        <b><?= NGALLERY['root']['title'] ?> — это универсальное средство для размещения своих фотографий и видеороликов, созданное на базе движка СТТС.</b><br>
+                                        <b>{$ngallery['root']['title']} — это универсальное средство для размещения своих фотографий и видеороликов, созданное на базе движка СТТС.</b><br>
                                         Публикуйте свои самые лучшие фотографии и великолепные видео на наш портал, чтобы их увидели все желающие.
                                     </td>
                                 </tr>
@@ -104,7 +81,7 @@ if (Auth::userid() > 0) {
                             <br>
                         </div>
 
-                        <script>
+                        <script n:syntax=off>
                             $(document).ready(function() {
                                 $('#email').on('input', function() {
                                     $('#err_email').html('');
@@ -149,23 +126,9 @@ if (Auth::userid() > 0) {
                             });
                         </script>
                     </center>
-                <?php } else { ?>
+               {else}
                     <center>
                         <h1>К сожалению, регистрация на сервере <?= NGALLERY['root']['title'] ?> закрыта.</h1>
-                        </center?
-                            <?php } ?>
-                            </td>
-        </tr>
-        <tr>
-            <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
-        </tr>
-
-        </tbody>
-    </table>
-
-
-
-
-</body>
-
-</html>
+                        </center>
+              {/if}
+{/block}

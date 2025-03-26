@@ -1,7 +1,3 @@
-<?php
-use App\Core\Page;
-?>
-
 <!DOCTYPE html><!-- "' --></textarea></script></style></pre></xmp></a></audio></button></canvas></datalist></details></dialog></iframe></listing></meter></noembed></noframes></noscript></optgroup></option></progress></rp></select></table></template></title></video>
 <meta charset="utf-8">
 <meta name=robots content=noindex>
@@ -26,7 +22,7 @@ use App\Core\Page;
 		<h1>Not Found</h1>
 
 		<p>The requested page not found on server.</p><br>
-        <pre><?php echo $_SERVER['REQUEST_URI']; http_response_code(404)?></pre>
+        <pre>{$_SERVER['REQUEST_URI']}</pre>
 
 
 	</div>

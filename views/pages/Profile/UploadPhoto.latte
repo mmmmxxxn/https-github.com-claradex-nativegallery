@@ -1,26 +1,6 @@
-<?php
-
-use \App\Services\{Auth, DB};
-use \App\Models\User;
-
-$user = new User(Auth::userid());
-?>
-<!DOCTYPE html>
-<html lang="ru">
-
-<head>
-    <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/LoadHead.php'); ?>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-</head>
-
-
-<body>
-    <div id="backgr"></div>
-    <table class="tmain">
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Navbar.php'); ?>
-        <tr>
-            <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+{layout '..\@layout.latte'}
+{block content}
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
             <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
             <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
             <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -29,35 +9,21 @@ $user = new User(Auth::userid());
             <link href="https://cesium.com/downloads/cesiumjs/releases/1.83/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
             <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-indoor/0.4.2/leaflet.indoor.min.js"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-indoor/0.4.2/leaflet.indoor.min.css" />
-            <!-- Подключение плагина Leaflet.markercluster -->
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
             <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-            <!-- Подключение плагина Leaflet-Geoman -->
             <link rel="stylesheet" href="https://unpkg.com/leaflet-geoman-free/dist/leaflet-geoman.css">
             <script src="https://unpkg.com/leaflet-geoman-free/dist/leaflet-geoman.min.js"></script>
-
-            <!-- Подключение плагина Leaflet-3d-model -->
             <script src="https://unpkg.com/leaflet-3d-model/dist/leaflet-3d-model.min.js"></script>
             <script>
                 var pub_pid = 0;
             </script>
-            <td class="main">
-            <?php if (NGALLERY['root']['registration']['emailverify'] != false || $user->i('status') === 3) {
-                die('Чтобы публиковать Фотографии и Видео, нужно подтвердить почту.');
-            } ?>
-                <h1>Предложить медиа на публикацию</h1>
-                <p>Ваш текущий индекс загрузки: <b><?= $user->i('uploadindex') ?></b></p>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+             <h1>Предложить медиа на публикацию</h1>
+                <p>Ваш текущий индекс загрузки: <b>{$user->i(uploadindex)}</b></p>
 
                 <div id="formtable">
-                    <?php
-                    if (NGALLERY['root']['photo']['upload']['premoderation'] === true) {
-                        if ($user->content('premoderation') === "true") {
-                            echo ' <div style="float:left; border:solid 1px #3b7dc1; padding:6px 10px 7px; margin-bottom:13px; background-color:#0199ff44"><b>Поздравляем, ' . $user->i('username') . '!</b><br>Администрацией ' . NGALLERY['root']['title'] . ' была одобрена возможность прямой загрузки фотографий для Вас.<br>Вы можете моментально загрузить любую фотографию, минуя премодерацию. Enjoy!</div>';
-                        }
-                    }
-                    ?>
-
+                    {if $ngallery[root][photo][upload][premoderation] === true}{if $user->content(premoderation) === "true"} <div style="float:left; border:solid 1px #3b7dc1; padding:6px 10px 7px; margin-bottom:13px; background-color:#0199ff44"><b>Поздравляем, {$user->i(username)}!</b><br>Администрацией {$ngallery[root][title]} была одобрена возможность прямой загрузки фотографий для Вас.<br>Вы можете моментально загрузить любую фотографию, минуя премодерацию. Enjoy!</div>{/if}{/if}
 
 
                     <div class="new_vehicle_template new_vehicle">
@@ -310,7 +276,7 @@ $user = new User(Auth::userid());
 
 
 
-                                <script>
+                                <script n:syntax=off>
                                     const imageUpload = document.getElementById('image');
 
                                     const inputFieldsContainer = document.getElementById('inputFields');
@@ -611,7 +577,7 @@ $user = new User(Auth::userid());
                                                 <option value="1852">1852</option>
                                                 <option value="1851">1851</option>
                                                 <option value="1850">1850</option>
-                                            </select>&nbsp; </span>&nbsp; <span id="dateLoaded" style="position:relative; top:2px; padding:2px 6px; display:none" class="nw label-green">Установлена дата из EXIF</span><span id="dateAbsent" style="position:relative; top:2px; padding:2px 6px; display:none" class="nw label-orange">Укажите дату съёмки (нет в EXIF)</span>&nbsp; <span class="sm nw"><a href="#" class="dot" onclick="setDate(<?= (new DateTime())->format('d,m,Y'); ?>); return false">Сегодня</a> &middot; <a href="#" class="dot" onclick="setDate(<?= (new DateTime('yesterday'))->format('d,m,Y'); ?>); return false">Вчера</a> &middot; <a href="#" class="dot" onclick="setDate(0,0,0); return false">Неизвестно</a></span>
+                                            </select>&nbsp; </span>&nbsp; <span id="dateLoaded" style="position:relative; top:2px; padding:2px 6px; display:none" class="nw label-green">Установлена дата из EXIF</span><span id="dateAbsent" style="position:relative; top:2px; padding:2px 6px; display:none" class="nw label-orange">Укажите дату съёмки (нет в EXIF)</span>&nbsp; <span class="sm nw"><a href="#" class="dot" onclick="setDate({=(new DateTime())->format('d,m,Y')}); return false">Сегодня</a> &middot; <a href="#" class="dot" onclick="setDate({=(new DateTime(yesterday))->format('d,m,Y')}); return false">Вчера</a> &middot; <a href="#" class="dot" onclick="setDate(0,0,0); return false">Неизвестно</a></span>
                                     </td>
                                 </tr>
                                 <tr class="lnk-gallery">
@@ -619,13 +585,9 @@ $user = new User(Auth::userid());
                                     <td style="padding-right:15px">
                                         <select name="gallery" id="search_gid">
                                             <option value="0">Общая</option>
-                                            <?php
-                                            $galleries = DB::query('SELECT * FROM galleries');
-                                            foreach ($galleries as $g) {
-                                                echo '<option value="' . $g['id'] . '">' . $g['title'] . '</option>';
-                                            }
-                                            ?>
-                                        </select>
+                                            {var $galleries = \App\Services\DB::query('SELECT * FROM galleries')}
+{foreach $galleries as $g}<option value="{$g[id]}">{$g[title]}</option>
+{/foreach}                                        </select>
                                     </td>
                                 </tr>
                                 <tr class="lnk-gallery" style="display:none">
@@ -649,13 +611,9 @@ $user = new User(Auth::userid());
                                 <tr class="lnk-vehicle">
                                     <td class="lcol">Вид сущности:</td>
                                     <td style="padding-right:15px"><select name="search_type" id="search_type" class="s5">
-                                            <?php
-                                            $entities = DB::query('SELECT * FROM entities');
-                                            foreach ($entities as $e) {
-                                                echo ' <option value="' . $e['id'] . '" style="background-color: ' . $e['color'] . '">' . $e['title'] . '</option>';
-                                            }
-                                            ?>
-                                        </select></td>
+                                            {var $entities = \App\Services\DB::query('SELECT * FROM entities')}
+{foreach $entities as $e} <option value="{$e[id]}" style="background-color: {$e[color]}">{$e[title]}</option>
+{/foreach}                                        </select></td>
                                 </tr>
                                 <tr class="lnk-vehicle">
                                     <td class="lcol">ID/Название модели:</td>
@@ -667,7 +625,7 @@ $user = new User(Auth::userid());
                                                         <input type="text" name="search_num" id="search_num" maxlength="15" style="width:150px; height:22px" onfocus="showHint('num')" onblur="hideHint('num')"><input type="button" id="searchVehiclesByNumBtn" class="searchVehiclesBtn" style="height:22px; padding-top:0; position:relative; left:-1px" onclick="searchVehicles(0)" value="Найти в БД">
                                                     </td>
                                                     <td style="padding:0; position:relative; vertical-align:top">
-                                                        <div style="border: 1px dashed rgb(255, 151, 151); color: red; background-color: rgb(255, 255, 153); padding: 2px 4px 3px; margin: 0px 5px; white-space: nowrap; position: absolute; display: none;" id="num_hint"><small>Введите название модели, или её уникальный ID на сервере <?= NGALLERY['root']['title'] ?>.</small></div>
+                                                        <div style="border: 1px dashed rgb(255, 151, 151); color: red; background-color: rgb(255, 255, 153); padding: 2px 4px 3px; margin: 0px 5px; white-space: nowrap; position: absolute; display: none;" id="num_hint"><small>Введите название модели, или её уникальный ID на сервере {=NGALLERY[root][title]}.</small></div>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -923,7 +881,7 @@ $(document).ready(function()
 
         </tr>
         </tbody>
-        <script>
+        <script n:syntax=off>
             var map = L.map('map_canvas').setView([55.7558, 37.6176], 13);
             var marker;
             var geocoder;
@@ -1251,12 +1209,6 @@ $(document).ready(function()
         <h4>Загруженные фотографии</h4>
         <div id="loadbox" style="display:flex; flex-wrap:wrap; gap:10px"></div>
     </div>
-    </td>
-    </tr>
-    <tr>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/views/components/Footer.php'); ?>
-    </tr>
-    </table>
     <script>
         $('#mform').submit(function(e) {
 
@@ -1390,6 +1342,4 @@ $(document).ready(function()
 
         });
     </script>
-</body>
-
-</html>
+{/block}
